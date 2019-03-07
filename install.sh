@@ -12,4 +12,5 @@ mkdir -p build && cd build/
 make
 sudo make install
 
-
+sudo apt install i3status i3lock
+sudo cp i3/i3status.conf /etc/i3status.conf
