@@ -14,3 +14,4 @@ sudo make install
 
 sudo apt install i3status i3lock
 sudo cp i3/i3status.conf /etc/i3status.conf
+sudo cp i3/config ~/.config/i3/config

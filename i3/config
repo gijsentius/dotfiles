@@ -188,6 +188,8 @@ bindsym $mod+shift+A exec amixer -D pulse set Master 1+ toggle
 bindsym $mod+shift+equal exec xbacklight -inc 5 # increase screen brightness
 bindsym $mod+shift+minus exec  xbacklight -dec 5 # decrease screen brightness 
 # touch pad controls
-
+# exec_always synclient HorizTwoFingerScroll=1
+exec_always synclient HorizEdgeScroll=1 VertEdgeScroll=1 VertScrollDelta=111
+# VertScrollDelta=-111
 # wallpaper
 exec_always feh --bg-scale $HOME/Pictures/wallpapers/wallhaven-740579.jpg
