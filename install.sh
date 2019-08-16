@@ -40,7 +40,9 @@ mkdir -p ~/.config/polybar/
 $if["$desktop" == "y"]
 then
     cp i3/config_desktop ~/.config/i3/config
+    cp polybar/config_desktop ~/.config/polybar/config
 else
     cp i3/config_laptop ~/.config/i3/config
+    cp polybar/config_default ~/.config/polybar/config
 fi
-cp polybar/* ~/.config/polybar/
+cp polybar/launch.sh ~/.config/polybar/
