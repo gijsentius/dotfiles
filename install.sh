@@ -3,19 +3,19 @@
 read -p "Is this a desktop installation? [y/n]: "  desktop
 
 # install all necessary software
-sudo add-apt-repository ppa:kgilmer/speed-ricer
-sudo add-apt-repository ppa:papirus/papirus
-sudo add-apt-repository ppa:noobslab/themes
+sudo add-apt-repository ppa:kgilmer/speed-ricer -y
+sudo add-apt-repository ppa:papirus/papirus -y
+sudo add-apt-repository ppa:noobslab/themes -y
 sudo apt update
 ## general tools
-sudo apt install suckless-tools thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel
+sudo apt install -y suckless-tools thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel
 ## icon theme and gtk theme
-sudo apt install arc-theme papirus-icon-theme
+sudo apt install -y arc-theme papirus-icon-theme
 ## convert images
-sudo apt install imagemagick
+ sudo apt install -y imagemagick
 ## i3 and polybar
-sudo apt install polybar i3-wm
-
+sudo apt install -y polybar i3-wm
+-
 # experimental
 ## solution for font problems
 sudo apt install fonts-font-awesome
@@ -37,8 +37,7 @@ cp -r /usr/share/icons/* ~/.icons/
 # configure i3 and polybar
 mkdir -p ~/.config/i3/
 mkdir -p ~/.config/polybar/
-$if["$desktop" == "y"]
-then
+if [ "$desktop" == "y" ]; then
     cp i3/config_desktop ~/.config/i3/config
     cp polybar/config_desktop ~/.config/polybar/config
 else
