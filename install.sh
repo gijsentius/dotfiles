@@ -8,17 +8,17 @@ sudo add-apt-repository ppa:papirus/papirus -y
 sudo add-apt-repository ppa:noobslab/themes -y
 sudo apt update
 ## general tools
-sudo apt install -y suckless-tools thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel
+sudo apt -y install suckless-tools thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel
 ## icon theme and gtk theme
-sudo apt install -y arc-theme papirus-icon-theme
+sudo apt -y install arc-theme papirus-icon-theme
 ## convert images
- sudo apt install -y imagemagick
+ sudo apt -y install imagemagick
 ## i3 and polybar
-sudo apt install -y polybar i3-wm
+sudo apt -y install polybar i3-wm
 -
 # experimental
 ## solution for font problems
-sudo apt install fonts-font-awesome
+sudo apt -y install fonts-font-awesome
 git clone https://github.com/stark/siji && cd siji
 ./install.sh
 ### remove the siji files
@@ -45,3 +45,11 @@ else
     cp polybar/config_default ~/.config/polybar/config
 fi
 cp polybar/launch.sh ~/.config/polybar/
+
+# install vs code
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+sudo apt -y install apt-transport-https
+sudo apt update
+sudo apt -y install code
