@@ -13,8 +13,8 @@ sudo apt -y install suckless-tools curl thunar alsa-utils xbacklight feh lxappea
 sudo apt -y install arc-theme papirus-icon-theme
 ## convert images
  sudo apt -y install imagemagick
-## i3 and polybar
-sudo apt -y install polybar i3-wm
+## i3, polybar and rofi
+sudo apt -y install polybar i3-wm rofi
 -
 # experimental
 ## solution for font problems
