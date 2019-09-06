@@ -46,6 +46,9 @@ else
 fi
 cp polybar/launch.sh ~/.config/polybar/
 
+# copy wallpapers
+cp -r wallpapers/ ~/Pictures/wallpapers/
+
 # install vs code
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
