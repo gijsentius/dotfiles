@@ -12,15 +12,16 @@ sudo apt -y install suckless-tools curl thunar alsa-utils xbacklight feh lxappea
 ## icon theme and gtk theme
 sudo apt -y install arc-theme papirus-icon-theme
 ## convert images
- sudo apt -y install imagemagick
+sudo apt -y install imagemagick
 ## i3, polybar and rofi
-sudo apt -y install polybar i3-wm rofi
+sudo apt -y install polybar i3-gaps-wm rofi
 -
 # experimental
 ## solution for font problems
 sudo apt -y install fonts-font-awesome
-git clone https://github.com/stark/siji && cd siji
-./install.sh
+git clone https://github.com/stark/siji
+cd siji
+sudo bash install.sh
 ### remove the siji files
 cd ..
 rm -rf siji
