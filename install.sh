@@ -15,6 +15,8 @@ sudo apt -y install arc-theme papirus-icon-theme
 sudo apt -y install imagemagick
 ## i3, polybar and rofi
 sudo apt -y install polybar i3-gaps-wm rofi
+## password manager
+sudo apt -y install pass
 -
 # experimental
 ## solution for font problems
