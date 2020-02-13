@@ -6,6 +6,7 @@ read -p "Is this a desktop installation? [y/n]: "  desktop
 sudo add-apt-repository ppa:kgilmer/speed-ricer -y
 sudo add-apt-repository ppa:papirus/papirus -y
 sudo add-apt-repository ppa:noobslab/themes -y
+sudo add-apt-repository ppa:apandada1/brightness-controller -y
 sudo apt update
 ## general tools
 sudo apt -y install suckless-tools tree  curl thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel python3-pip git
@@ -19,8 +20,9 @@ sudo apt -y install polybar rofi
 sudo apt -y install pass
 ## pandoc etc
 sudo apt -y install pandoc pandoc-citeproc
+## brightness controller
+sudo apt -y install brightness-controller-simple
 
--
 # experimental
 ## solution for font problems
 sudo apt -y install fonts-font-awesome
