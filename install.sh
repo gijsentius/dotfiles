@@ -9,7 +9,7 @@ sudo add-apt-repository ppa:noobslab/themes -y
 sudo add-apt-repository ppa:apandada1/brightness-controller -y
 sudo apt update
 ## general tools
-sudo apt -y install suckless-tools tree  curl thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel python3-pip git
+sudo apt -y install suckless-tools tree  curl thunar alsa-utils xbacklight feh lxappearance gtk-chtheme qt4-qtconfig i3status net-tools gucharmap git i3lock gpick vim bc xclip xdotool xsel python3-pip
 ## icon theme and gtk theme
 sudo apt -y install arc-theme papirus-icon-theme
 ## convert images
@@ -19,7 +19,19 @@ sudo apt -y install polybar rofi
 ## password manager
 sudo apt -y install pass
 ## pandoc etc
-sudo apt -y install pandoc pandoc-citeproc
+wget https://github.com/jgm/pandoc/releases/download/2.9.2/pandoc-2.9.2-1-amd64.deb
+sudo dpkg -i pandoc-2.9.2-1-amd64.deb
+rm pandoc-2.9.2-1-amd64.deb
+wget https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.6.2/linux-pandoc_2_9_2.tar.gz
+tar xfv linux-pandoc_2_9_2.tar.gz
+rm linux-pandoc_2_9_2.tar.gz
+mv pandoc-crossref ~/.local/bin/pandoc-crossref
+
+### Add template
+wget https://github.com/gijsentius/eisvogel-report/releases/download/1/eisvogel.tex
+mkdir -p ~/.pandoc/templates/
+mv eisvogel.tex ~/.pandoc/templates/eisvogel.latex
+
 ## brightness controller
 sudo apt -y install brightness-controller-simple
 
@@ -64,3 +76,6 @@ sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microso
 sudo apt -y install apt-transport-https
 sudo apt update
 sudo apt -y install code
+
+# finally install tex-live
+sudo apt install texlive-full
