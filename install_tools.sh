@@ -32,6 +32,7 @@ sudo apt -y install xclip
 sudo apt -y install python3-pip
 sudo apt -y install vlc
 sudo apt -y install gconf2
+sudo apt -y install pavucontrol
 
 ## icon theme, theme and font
 sudo apt -y install arc-theme 
@@ -61,6 +62,9 @@ curl -sS https://download.spotify.com/debian/pubkey.gpg | sudo apt-key add -
 curl -sS https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add - 
 echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
 sudo apt-get install spotify-client -y
+
+## joplin
+wget -O - https://raw.githubusercontent.com/laurent22/joplin/master/Joplin_install_and_update.sh | bash
 
 ## fix broken
 sudo apt --fix-broken install -y
