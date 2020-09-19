@@ -27,14 +27,14 @@ cd ..
 rm -rf siji
 
 ## terminal
-wget https://github.com/r3tex/one-dark/archive/master.zip
-unzip master.zip
-mv one-dark-master/bashrc ~/.bashrc
-mv one-dark-master/onedark_prompt.sh ~/.onedark_prompt.sh
-mv one-dark-master/dircolors ~/.dircolors
-rm master.zip
-rm -r one-dark-master
-echo "test -r ~/.dircolors && eval \"$(dircolors -b ~/.dircolors)\" || eval \"$(dircolors -b)\"" >> ~/.bashrc
+# wget https://github.com/r3tex/one-dark/archive/master.zip
+# unzip master.zip
+# mv one-dark-master/bashrc ~/.bashrc
+# mv one-dark-master/onedark_prompt.sh ~/.onedark_prompt.sh
+# mv one-dark-master/dircolors ~/.dircolors
+# rm master.zip
+# rm -r one-dark-master
+# echo "test -r ~/.dircolors && eval \"$(dircolors -b ~/.dircolors)\" || eval \"$(dircolors -b)\"" >> ~/.bashrc
 
 # Enable terminal color scheme
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh)"
