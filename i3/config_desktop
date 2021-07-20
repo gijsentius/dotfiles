@@ -193,3 +193,4 @@ bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 5%-
 
 # wallpaper
 exec_always --no-startup-id feh --bg-scale $HOME/Pictures/wallpapers/wallpaper.jpg
+exec_always --no-startup-id xrandr --output DisplayPort-0 --mode 3440x1440 --rate 100
