@@ -23,3 +23,8 @@ export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=1000000000
 export SAVEHIST=1000000000
 setopt EXTENDED_HISTORY
+
+# Brew specifics
+if [[ $(command -v brew) != "" ]]; then
+    export PKG_CONFIG_PATH="$(brew --prefix)/Cellar/mysql-client/9.0.1/lib/pkgconfig"
+fi
