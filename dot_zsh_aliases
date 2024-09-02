@@ -24,3 +24,5 @@ alias createpassword="openssl rand -base64 30"
 for al in `git --list-cmds=alias`; do
     alias g$al="git $al"
 done
+
+alias k=kubectl
