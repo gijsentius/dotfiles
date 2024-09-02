@@ -1,0 +1,54 @@
+if [ -z $TMUX ] && [[ "$(tmux list-sessions | grep -c workspace)" -ge 1 ]]; then
+  tmux attach -t workspace
+elif [ -z $TMUX ]; then
+  tmux new-session -s workspace
+fi
+
+autoload -Uz compinit
+compinit
+
+# Init fuzzy finder
+source <(fzf --zsh)
+
+# Configure kubectl autocompletion
+source ~/.config/kube_complete.sh
+
+# Init starship
+eval "$(starship init zsh)"
+
+# History settings
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=1000000000
+export SAVEHIST=1000000000
+setopt EXTENDED_HISTORY
+setopt    appendhistory     #Append history to the history file (no overwriting)
+setopt    sharehistory      #Share history across terminals
+setopt    incappendhistory  #Immediately append to the history file, not just when a term is killed
+
+{{ if eq .chezmoi.os "darwin" -}}
+
+if [ -f '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '/Users/gijs/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/gijs/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh;
+
+export PKG_CONFIG_PATH="$(brew --prefix)/Cellar/mysql-client/9.0.1/lib/pkgconfig"
+export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
+export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
+
+{{ else if eq .chezmoi.os "linux" -}}
+
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+{{ end -}}
+
+source ~/.zsh_aliases
+
+{{- if eq .chezmoi.hostname "DUO-B1PLST-0006" -}}
+source ~/.work
+{{- end -}}
+
+{{- if eq .chezmoi.hostname "Gijss.air" -}}
+source ~/.marksmen
+{{- end -}}
+
