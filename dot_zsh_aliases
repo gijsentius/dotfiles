@@ -16,10 +16,6 @@ alias df='df -x"squashfs"'
 alias pandock='docker run --rm --platform linux/amd64 -v "$(pwd):/data" -u $(id -u):$(id -g) pandoc/extra --from markdown --template eisvogel --listings'
 alias projects='cd ~/Projects'
 
-# Marksmen aliases
-alias rep='gcloud container clusters get-credentials rep-cluster --region=europe-west4-a'
-alias talentro='gcloud container clusters get-credentials talentro-staging --region=europe-west4-a'
-
 # Generate password
 alias createpassword="openssl rand -base64 30"
 
