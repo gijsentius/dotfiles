@@ -2,3 +2,4 @@ README.md
 {{- if ne .chezmoi.os "linux" }}
 .marksmen
 {{- end }}
+install.sh
