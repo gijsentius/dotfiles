@@ -36,6 +36,8 @@ export PKG_CONFIG_PATH="$(brew --prefix)/Cellar/mysql-client/9.0.1/lib/pkgconfig
 export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
 export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
 
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
 {{ else if eq .chezmoi.os "linux" -}}
 
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
