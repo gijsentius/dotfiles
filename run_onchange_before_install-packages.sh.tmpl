@@ -1,5 +1,6 @@
-{{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
+
+{{ if eq .chezmoi.os "linux" -}}
 
 sudo apt install ripgrep
 sudo apt install wget
@@ -8,9 +9,9 @@ sudo apt install build-essential
 npm install -g @bitwarden/cli
 sudo apt install neovim
 sudo apt install kubectl
+sudo apt install npm
 
 {{ else if eq .chezmoi.os "darwin" -}}
-#!/bin/sh
 
 brew install ripgrep
 brew install zsh-syntax-highlighting
@@ -20,7 +21,6 @@ brew install mysql-client
 brew install trivy
 brew install tmux
 brew install npm
-npm install -g @bitwarden/cli
 brew install wget
 brew install neovim
 brew install lima
@@ -32,3 +32,6 @@ brew install unzip
 brew install font-fira-code-nerd-font
 brew install xclip
 {{ end -}}
+
+npm install -g @bitwarden/cli
+curl https://bws.bitwarden.com/install | sh
