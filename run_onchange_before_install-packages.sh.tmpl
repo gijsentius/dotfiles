@@ -12,6 +12,7 @@ sudo apt install kubectl
 sudo apt install npm
 sudo apt install git-extras
 
+
 {{ else if eq .chezmoi.os "darwin" -}}
 
 brew install ripgrep
@@ -33,6 +34,7 @@ brew install unzip
 brew install font-fira-code-nerd-font
 brew install xclip
 brew install git-extras
+brew install --cask alacritty
 
 {{ end -}}
 
