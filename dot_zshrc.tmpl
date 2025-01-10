@@ -72,6 +72,8 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 source ~/.zsh_aliases
 
+alias rancher='export KUBECONFIG=~/.kube/rancher-config'
+
 if [ -f ~/.zsh_overrides ]; then
 source ~/.zsh_overrides
 fi
