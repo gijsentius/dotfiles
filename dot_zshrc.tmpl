@@ -57,6 +57,9 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
+# Install flux complextions
+. <(flux completion zsh)
+
 {{ if eq .chezmoi.os "darwin" -}}
 
 if [ -f '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc'; fi
