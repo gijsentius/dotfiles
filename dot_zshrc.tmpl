@@ -65,10 +65,6 @@ setopt hist_find_no_dups
 if [ -f '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/gijs/Downloads/google-cloud-sdk/path.zsh.inc'; fi
 if [ -f '/Users/gijs/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/gijs/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
-export PKG_CONFIG_PATH="$(brew --prefix)/Cellar/mysql-client/9.0.1/lib/pkgconfig"
-export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
-export MYSQLCLIENT_LDFLAGS=`pkg-config mysqlclient --libs`
-
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 {{ end -}}
