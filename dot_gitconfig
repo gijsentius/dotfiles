@@ -8,6 +8,11 @@
 	editor = /usr/bin/vim
 	excludesfile = /Users/gijs/.gitignore_global
 	pager=less -x4
+	attributesfile = ~/.gitattributes
+
+[merge "mergiraf"]
+	name = mergiraf
+	driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
 
 [color]
 	branch = auto
