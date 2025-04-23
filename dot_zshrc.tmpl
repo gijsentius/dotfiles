@@ -1,3 +1,7 @@
+if [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
+  return
+fi
+
 if [ -z $TMUX ] && [[ "$(tmux list-sessions | grep -c workspace)" -ge 1 ]]; then
   tmux attach -t workspace
 elif [ -z $TMUX ]; then
