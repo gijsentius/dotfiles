@@ -1,3 +1,0 @@
-# Marksmen aliases
-alias rep='gcloud container clusters get-credentials rep-cluster --region=europe-west4-a'
-alias talentro='gcloud container clusters get-credentials talentro-staging --region=europe-west4-a'
