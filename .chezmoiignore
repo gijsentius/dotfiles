@@ -1,5 +1,5 @@
 README.md
-{{- if ne .chezmoi.os "linux" }}
-.marksmen
+{{- if ne .chezmoi.os "darwin" }}
+dot_alacritty.toml
 {{- end }}
 install.sh
