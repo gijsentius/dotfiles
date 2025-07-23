@@ -77,6 +77,8 @@ source ~/.zsh_aliases
 
 alias rancher='export KUBECONFIG=~/.kube/rancher-config'
 
+export PATH=~/.bin/:$PATH
+
 if [ -f ~/.zsh_overrides ]; then
 source ~/.zsh_overrides
 fi
