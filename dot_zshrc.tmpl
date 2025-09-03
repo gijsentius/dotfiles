@@ -45,6 +45,9 @@ source <(fzf --zsh)
 
 # Configure kubectl autocompletion
 source ~/.config/kube_complete.sh
+{{ if eq .chezmoi.os "darwin" -}}
+source ~/.config/lima_completion.zsh
+{{ end -}}
 
 # Init starship
 eval "$(starship init zsh)"
