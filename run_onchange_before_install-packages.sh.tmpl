@@ -2,16 +2,18 @@
 
 {{ if eq .chezmoi.os "linux" -}}
 
+sudo apt update
+
 sudo apt install ripgrep
 sudo apt install wget
 sudo apt install npm
 sudo apt install build-essential
-npm install -g @bitwarden/cli
-sudo apt install neovim
 sudo apt install kubectl
 sudo apt install npm
 sudo apt install git-extras
-
+sudo apt install tmux
+sudo apt install zsh
+sudo apt install git
 
 {{ else if eq .chezmoi.os "darwin" -}}
 

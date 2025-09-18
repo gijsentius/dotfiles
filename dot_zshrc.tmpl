@@ -41,7 +41,7 @@ zinit snippet OMZP::argocd
 zinit snippet OMZP::chezmoi
 
 # Init fuzzy finder
-source <(fzf --zsh)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Configure kubectl autocompletion
 source ~/.config/kube_complete.sh
@@ -85,4 +85,3 @@ export PATH=~/.bin/:$PATH
 if [ -f ~/.zsh_overrides ]; then
 source ~/.zsh_overrides
 fi
-
