@@ -86,6 +86,9 @@ export NVM_DIR="$HOME/.nvm"
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
+# Source all zsh stuff
+for f in ~/.zsh/*; do source $f; done
+
 if [ -f ~/.zsh_overrides ]; then
 source ~/.zsh_overrides
 fi
