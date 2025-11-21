@@ -6,6 +6,9 @@ bash -c "${brew_install_script}"
 
 {{ if eq .chezmoi.os "linux" -}}
 
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/{{ .chezmoi.osRelease.versionCodename }}.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/{{ .chezmoi.osRelease.versionCodename }}.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+
 sudo apt update
 sudo apt upgrade -y
 
@@ -20,6 +23,7 @@ sudo apt install git
 sudo apt install make
 sudo apt install unzip
 sudo apt install fd-find
+sudo apt install tailscale
 sudo apt install xclip
 
 
@@ -143,6 +147,7 @@ brew cleanup
 
 curl -fsSL https://claude.ai/install.sh | bash
 brew install gemini-cli
+brew install siderolabs/tap/talosctl
 
 (
   set -x; cd "$(mktemp -d)" &&
