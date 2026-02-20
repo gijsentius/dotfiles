@@ -71,6 +71,14 @@ source ~/.zsh_aliases
 
 alias rancher='export KUBECONFIG=~/.kube/rancher-config'
 
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 {{ if eq .chezmoi.os "linux" -}}
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
@@ -89,6 +97,10 @@ export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 {{ if eq .chezmoi.os "linux" -}}
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{ end -}}
+
+{{ if eq .chezmoi.os "darwin" -}}
+export path="$PATH:$(brew --prefix coreutils)/libexec/gnubin"
+{{ end }}
 
 # Source all zsh stuff
 for f in ~/.zsh/*; do source $f; done
