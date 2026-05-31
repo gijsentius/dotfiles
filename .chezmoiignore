@@ -1,5 +1,6 @@
 README.md
 install.sh
+dot_config/nvim/lazyvim.json
 {{- if ne .chezmoi.os "darwin" }}
 dot_alacritty.toml
 {{- end }}

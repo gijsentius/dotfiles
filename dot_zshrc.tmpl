@@ -43,12 +43,6 @@ zinit snippet OMZP::chezmoi
 # Init fuzzy finder
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Configure kubectl autocompletion
-source ~/.config/kube_complete.sh
-{{ if eq .chezmoi.os "darwin" -}}
-source ~/.zsh/lima_completion.zsh
-{{ end -}}
-
 # Init starship
 eval "$(starship init zsh)"
 
@@ -64,13 +58,6 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
-# Install flux complextions
-. <(flux completion zsh)
-
-source ~/.zsh_aliases
-
-alias rancher='export KUBECONFIG=~/.kube/rancher-config'
-
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	command yazi "$@" --cwd-file="$tmp"
@@ -80,27 +67,15 @@ function y() {
 }
 
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-{{ if eq .chezmoi.os "linux" -}}
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
-export PATH=$PATH:/usr/local/go/bin
-{{ end -}}
 export PATH=~/.bin/:$PATH
 export PATH=~/.local/bin/:$PATH
-
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH=/opt/homebrew/bin:$PATH
 
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
 {{ if eq .chezmoi.os "linux" -}}
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{ end -}}
-
-{{ if eq .chezmoi.os "darwin" -}}
-export path="$PATH:$(brew --prefix coreutils)/libexec/gnubin"
-{{ end }}
 
 # Source all zsh stuff
 for f in ~/.zsh/*; do source $f; done

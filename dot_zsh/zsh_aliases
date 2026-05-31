@@ -8,6 +8,8 @@ alias diff='diff --color=auto'
 alias duh='du -hsx * 2>/dev/null | sort -hr | head -n 6'
 alias ip='ip -c'
 alias vim='nvim'
+alias n='nvim'
+alias k=kubectl
 
 # Remove squashfs (snaps) from df
 alias df='df -x"squashfs"'
@@ -25,4 +27,4 @@ for al in `git --list-cmds=alias`; do
     alias g$al="git $al"
 done
 
-alias k=kubectl
+alias rancher='export KUBECONFIG=~/.kube/rancher-config'

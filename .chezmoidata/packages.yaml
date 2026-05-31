@@ -8,6 +8,8 @@ packages:
       - "gnu-sed"
       - "ripgrep"
       - "fd"
+      - "gh"
+      - "lazygit"
       - "starship"
       - "zsh-syntax-highlighting"
       - "k9s"

@@ -1,0 +1,10 @@
+# Configure kubectl autocompletion
+source ~/.zsh/completions/kube_completion.zsh
+source ~/.zsh/completions/talos_completion.zsh
+source ~/.zsh/completions/sops_completion.zsh
+# Install flux complextions
+source <(flux completion zsh)
+eval <(fzf --zsh)
+{{ if eq .chezmoi.os "darwin" -}}
+source ~/.zsh/completions/lima_completion.zsh
+{{ end -}}
