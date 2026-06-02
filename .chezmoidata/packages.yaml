@@ -8,6 +8,7 @@ packages:
       - "gnu-sed"
       - "ripgrep"
       - "fd"
+      - "openbao"
       - "gh"
       - "lazygit"
       - "starship"
