@@ -4,7 +4,7 @@ source ~/.zsh/completions/talos_completion.zsh
 source ~/.zsh/completions/sops_completion.zsh
 # Install flux complextions
 source <(flux completion zsh)
-eval <(fzf --zsh)
+eval "$(fzf --zsh)"
 {{ if eq .chezmoi.os "darwin" -}}
 source ~/.zsh/completions/lima_completion.zsh
 autoload -U +X bashcompinit && bashcompinit
