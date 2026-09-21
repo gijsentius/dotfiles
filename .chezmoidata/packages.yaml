@@ -55,12 +55,9 @@ packages:
       - "tailscale"
       - "go"
     casks:
-      - "google-chrome"
       - "font-cascadia-code-pl"
-      - "alacritty"
   linux:
     brews:
-      - "gemini-cli"
       - "siderolabs/tap/talosctl"
       - "starship"
       - "talhelper"
@@ -73,6 +70,7 @@ packages:
       - "fzf"
       - "neovim"
       - "tailscale"
+      - tree-sitter-cli
     apt:
       - "ripgrep"
       - "wget"
