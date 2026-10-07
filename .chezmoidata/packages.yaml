@@ -13,7 +13,8 @@ packages:
       - "lazygit"
       - "starship"
       - "zsh-syntax-highlighting"
-      - "k9s"
+      # - "k9s" replaces with sofka
+      - "sofka"
       - "trivy"
       - "elixir"
       - "tmux"
@@ -22,7 +23,6 @@ packages:
       - "neovim"
       - "lima"
       - "go"
-      - "fluxcd/tap/flux"
       - "mergiraf"
       - "difftastic"
       - "ack"
@@ -47,9 +47,6 @@ packages:
       - "tree"
       - "vbindiff"
       - "zopfli"
-      - "gemini-cli"
-      - "siderolabs/tap/talosctl"
-      - "talhelper"
       - "sops"
       - "age"
       - "tailscale"
@@ -58,12 +55,12 @@ packages:
       - "font-cascadia-code-pl"
   linux:
     brews:
-      - "siderolabs/tap/talosctl"
       - "starship"
       - "talhelper"
       - "sops"
       - "age"
-      - "k9s"
+      # - "k9s" replaces with sofka
+      - "sofka"
       - "ruff"
       - "go"
       - "npm"
