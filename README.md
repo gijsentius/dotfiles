@@ -84,6 +84,14 @@ The configuration uses chezmoi templating to handle OS differences:
 {{ end -}}
 ```
 
+### Work vs. Personal Machines
+`chezmoi init` asks once whether this is a work machine and stores the answer as `work` in `~/.config/chezmoi/chezmoi.toml`. When `work = true`:
+- packages under `packages.personal` in `.chezmoidata/packages.yaml` (AI tooling such as Claude Code) are not installed
+- the Neovim AI extras (Copilot, Claude Code) are left out of `lua/config/extras.lua`
+- AI tool config dirs (`~/.claude`, `~/.gemini`, `~/.config/github-copilot`) are ignored
+
+To change it later, edit `work` with `chezmoi edit-config`, then `chezmoi apply`.
+
 ### Local Overrides
 Create `~/.zsh_overrides` for machine-specific customizations that won't be tracked by chezmoi.
 

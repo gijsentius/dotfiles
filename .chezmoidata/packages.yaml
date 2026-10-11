@@ -27,7 +27,6 @@ packages:
       - "difftastic"
       - "ack"
       - "exiv2"
-      - "git"
       - "make"
       - "unzip"
       - "fzf"
@@ -50,7 +49,6 @@ packages:
       - "sops"
       - "age"
       - "tailscale"
-      - "go"
     casks:
       - "font-cascadia-code-pl"
   linux:
@@ -67,12 +65,12 @@ packages:
       - "fzf"
       - "neovim"
       - "tailscale"
-      - tree-sitter-cli
+      - "tree-sitter-cli"
+      - "kubernetes-cli"
     apt:
       - "ripgrep"
       - "wget"
       - "build-essential"
-      - "kubectl"
       - "git-extras"
       - "tmux"
       - "zsh"
@@ -81,3 +79,15 @@ packages:
       - "unzip"
       - "fd-find"
       - "xclip"
+  # Only installed on personal machines (skipped when `work = true`)
+  personal:
+    darwin:
+      casks:
+        - "claude-code"
+      brews:
+        - "gemini-cli"
+    linux:
+      casks:
+        - "claude-code"
+      brews:
+        - "gemini-cli"

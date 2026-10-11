@@ -1,0 +1,6 @@
+{{- $work := promptBoolOnce . "work" "Is this a work machine (no AI tooling)" -}}
+{{- $email := promptStringOnce . "email" "Git email address" "g.m.entius@gmail.com" -}}
+
+[data]
+    work = {{ $work }}
+    email = {{ $email | quote }}

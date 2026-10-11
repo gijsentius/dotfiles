@@ -1,11 +1,30 @@
+{{/* AI tooling etc. from .packages.personal, skipped on work machines */ -}}
+{{ $personal := dict "brews" list "casks" list -}}
+{{ if not .work -}}
+{{   $personal = merge (get .packages.personal .chezmoi.os | default dict) $personal -}}
+{{ end -}}
+
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
+
+set -euo pipefail
+
+# brew is not on PATH yet on a fresh machine
+for brew in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+  [ -x "$brew" ] && eval "$("$brew" shellenv)" && break
+done
 
 brew bundle --file=/dev/stdin <<EOF
 {{ range .packages.darwin.brews -}}
 brew {{ . | quote }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
+cask {{ . | quote }}
+{{ end -}}
+{{ range $personal.brews -}}
+brew {{ . | quote }}
+{{ end -}}
+{{ range $personal.casks -}}
 cask {{ . | quote }}
 {{ end -}}
 EOF
@@ -15,6 +34,11 @@ EOF
 {{ if eq .chezmoi.os "linux" -}}
 #!/bin/bash
 
+set -euo pipefail
+
+# brew is not on PATH yet on a fresh machine
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
 {{ if .packages.linux.apt -}}
 
 sudo apt-get update
@@ -23,10 +47,11 @@ sudo apt-get install -y {{ range .packages.linux.apt }}{{ . }} {{ end }}
 sudo apt autoremove -y
 {{ end -}}
 
-{{ if .packages.linux.brews -}}
-{{ range .packages.linux.brews -}}
+{{ range concat .packages.linux.brews $personal.brews -}}
 brew install {{ . | quote }}
 {{ end -}}
+{{ range $personal.casks -}}
+brew install --cask {{ . | quote }}
 {{ end -}}
 
 {{ end -}}
