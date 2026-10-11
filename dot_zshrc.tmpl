@@ -2,10 +2,9 @@ if [ -n "$INTELLIJ_ENVIRONMENT_READER" ]; then
   return
 fi
 
-if [ -z $TMUX ] && [[ "$(tmux list-sessions | grep -c workspace)" -ge 1 ]]; then
-  tmux attach -t workspace
-elif [ -z $TMUX ]; then
-  tmux new-session -s workspace
+# Attach to (or create) the "workspace" tmux session
+if [ -z "$TMUX" ] && command -v tmux >/dev/null; then
+  tmux new-session -A -s workspace
 fi
 
 # Set the directory we want to store zinit and plugins
@@ -77,8 +76,8 @@ export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{ end -}}
 
-# Source all zsh stuff
-for f in ~/.zsh/*; do source $f; done
+# Source all zsh stuff (files only; completions are loaded by completions.sh)
+for f in ~/.zsh/*(.N); do source $f; done
 
 if [ -f ~/.zsh_overrides ]; then
 source ~/.zsh_overrides

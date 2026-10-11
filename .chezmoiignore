@@ -1,6 +1,15 @@
 README.md
 install.sh
-dot_config/nvim/lazyvim.json
+.config/nvim/lazyvim.json
 {{- if ne .chezmoi.os "darwin" }}
-dot_alacritty.toml
+.alacritty.toml
+{{- end }}
+{{- if .work }}
+.claude
+.claude/**
+.claude.json
+.gemini
+.gemini/**
+.config/github-copilot
+.config/github-copilot/**
 {{- end }}

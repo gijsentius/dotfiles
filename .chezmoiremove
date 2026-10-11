@@ -1,0 +1,6 @@
+# Leftovers from the old layout, now living in ~/.zsh/completions/.
+# ~/.zshrc sources every file in ~/.zsh, so these would be loaded twice.
+.zsh/kube_complete.sh
+.zsh/lima_completion.zsh
+.zsh/sops_completion.zsh
+.zsh/talos-completion.zsh
