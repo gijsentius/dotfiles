@@ -5,3 +5,5 @@
 .zsh/sops_completion.zsh
 .zsh/talos-completion.zsh
 .config/yazi.toml
+# Replaced by cached completions in ~/.cache/zsh/completions
+.zsh/completions
