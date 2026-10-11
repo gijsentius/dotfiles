@@ -1,0 +1,412 @@
+# oc-like helpers on top of kubectl. Work with vanilla k8s, Talos and OpenShift.
+# Written to be sourced by both zsh and bash.
+#
+#   klogin       log in to a cluster (token, OpenShift user/password, Talos, kubeconfig file)
+#   klogout      revoke/remove the token of the current context
+#   kwhoami      show current user (-t token, -c context, --show-server, --show-console)
+#   kctx         list/switch contexts (-i fzf picker, - previous context)
+#   kproject     show/switch namespace of the current context (-i fzf picker, -q quiet)
+#   kprojects    list namespaces/projects you have access to
+#   knew-project create a namespace (ProjectRequest on OpenShift) and switch to it
+
+_k_err() { printf '%s\n' "error: $*" >&2; }
+
+_k_current_ns() {
+  local ns
+  ns=$(kubectl config view --minify -o jsonpath='{.contexts[0].context.namespace}' 2>/dev/null)
+  printf '%s' "${ns:-default}"
+}
+
+_k_current_server() {
+  kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null
+}
+
+# _k_cluster_field <cluster-name> <field>
+_k_cluster_field() {
+  kubectl config view --raw -o jsonpath="{.clusters[?(@.name==\"$1\")].cluster.$2}" 2>/dev/null
+}
+
+# https://api.foo.example.com:6443 -> api-foo-example-com:6443 (same naming as oc)
+_k_cluster_name() {
+  local hp=${1#*://}
+  hp=${hp%%/*}
+  case $hp in *:*) ;; *) hp="$hp:443" ;; esac
+  printf '%s' "$hp" | tr . -
+}
+
+_k_is_openshift() {
+  kubectl get --raw /apis/project.openshift.io/v1 >/dev/null 2>&1
+}
+
+# Projects on OpenShift (respects RBAC for normal users), namespaces elsewhere.
+_k_list_ns() {
+  local jp='{range .items[*]}{.metadata.name}{"\n"}{end}'
+  if _k_is_openshift; then
+    kubectl get projects.project.openshift.io -o jsonpath="$jp"
+  else
+    kubectl get namespaces -o jsonpath="$jp"
+  fi
+}
+
+_k_pick() {
+  command -v fzf >/dev/null 2>&1 || { _k_err "fzf is not installed"; return 1; }
+  fzf --height=40% --reverse --prompt="$1> "
+}
+
+_k_kubeconfig_target() {
+  local t=${KUBECONFIG%%:*}
+  printf '%s' "${t:-$HOME/.kube/config}"
+}
+
+kwhoami() {
+  case $1 in
+    -t|--show-token)
+      kubectl config view --minify --raw -o jsonpath='{.users[0].user.token}'; echo ;;
+    -c|--show-context)
+      kubectl config current-context ;;
+    --show-server)
+      _k_current_server; echo ;;
+    --show-console)
+      kubectl get configmap console-public -n openshift-config-managed \
+        -o jsonpath='{.data.consoleURL}' && echo ;;
+    "")
+      kubectl auth whoami -o jsonpath='{.status.userInfo.username}' 2>/dev/null && { echo; return; }
+      kubectl get users.user.openshift.io '~' -o jsonpath='{.metadata.name}' 2>/dev/null && { echo; return; }
+      # Fall back to the kubeconfig user entry name
+      kubectl config view --minify -o jsonpath='{.contexts[0].context.user}'; echo ;;
+    *)
+      echo "usage: kwhoami [-t|--show-token] [-c|--show-context] [--show-server] [--show-console]" >&2
+      return 1 ;;
+  esac
+}
+
+kctx() {
+  local prev_file="${XDG_CACHE_HOME:-$HOME/.cache}/kctx_previous" cur target
+  cur=$(kubectl config current-context 2>/dev/null)
+  case $1 in
+    "")
+      kubectl config get-contexts; return ;;
+    -h|--help)
+      echo "usage: kctx [CONTEXT | -i | -]" >&2; return ;;
+    -i)
+      target=$(kubectl config get-contexts -o name | _k_pick context) || return ;;
+    -)
+      target=$(cat "$prev_file" 2>/dev/null)
+      [ -n "$target" ] || { _k_err "no previous context"; return 1; } ;;
+    *)
+      target=$1 ;;
+  esac
+  kubectl config use-context "$target" || return
+  if [ -n "$cur" ] && [ "$cur" != "$target" ]; then
+    mkdir -p "${prev_file%/*}" && printf '%s' "$cur" > "$prev_file"
+  fi
+}
+
+kproject() {
+  local ctx ns out
+  ctx=$(kubectl config current-context 2>/dev/null) || { _k_err "no current context, use klogin or kctx first"; return 1; }
+  case $1 in
+    "")
+      echo "Using project \"$(_k_current_ns)\" on server \"$(_k_current_server)\" (context \"$ctx\")."
+      return ;;
+    -q|--short)
+      _k_current_ns; echo; return ;;
+    -h|--help)
+      echo "usage: kproject [NAMESPACE | -i | -q]" >&2; return ;;
+    -i)
+      ns=$(_k_list_ns | _k_pick namespace) || return ;;
+    *)
+      ns=$1 ;;
+  esac
+
+  if ! out=$(kubectl get namespace "$ns" -o name 2>&1); then
+    case $out in
+      *NotFound*|*"not found"*)
+        _k_err "namespace \"$ns\" does not exist"; return 1 ;;
+    esac
+    # Forbidden on namespaces (normal OpenShift user): check the project instead
+    if ! out=$(kubectl get projects.project.openshift.io "$ns" -o name 2>&1); then
+      case $out in
+        *NotFound*|*"not found"*|*Forbidden*|*forbidden*)
+          _k_err "namespace \"$ns\" does not exist or you have no access"; return 1 ;;
+        *)
+          echo "warning: could not verify namespace \"$ns\", switching anyway" >&2 ;;
+      esac
+    fi
+  fi
+
+  kubectl config set-context --current --namespace="$ns" >/dev/null || return
+  echo "Now using project \"$ns\" on server \"$(_k_current_server)\" (context \"$ctx\")."
+}
+
+kprojects() {
+  local cur n
+  cur=$(_k_current_ns)
+  _k_list_ns | while IFS= read -r n; do
+    if [ "$n" = "$cur" ]; then echo "  * $n"; else echo "    $n"; fi
+  done
+}
+
+knew-project() {
+  [ -n "$1" ] || { echo "usage: knew-project NAME" >&2; return 1; }
+  if _k_is_openshift; then
+    kubectl create -f - >/dev/null <<EOF || return
+apiVersion: project.openshift.io/v1
+kind: ProjectRequest
+metadata:
+  name: $1
+EOF
+  else
+    kubectl create namespace "$1" >/dev/null || return
+  fi
+  kubectl config set-context --current --namespace="$1" >/dev/null || return
+  echo "Now using project \"$1\" on server \"$(_k_current_server)\"."
+}
+
+klogout() {
+  local ctx kuser token name
+  ctx=$(kubectl config current-context 2>/dev/null) || { _k_err "no current context"; return 1; }
+  kuser=$(kubectl config view --minify -o jsonpath='{.contexts[0].context.user}')
+  token=$(kubectl config view --minify --raw -o jsonpath='{.users[0].user.token}')
+  if [ -z "$token" ]; then
+    _k_err "context \"$ctx\" does not use a token (client cert / exec auth), nothing to log out"
+    return 1
+  fi
+  # OpenShift OAuth tokens: revoke server side. The object name is sha256~ + base64url(sha256(token)).
+  case $token in
+    "sha256~"*)
+      name="sha256~$(printf '%s' "${token#"sha256~"}" | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '=\n')"
+      kubectl delete useroauthaccesstokens.oauth.openshift.io "$name" >/dev/null 2>&1 \
+        || kubectl delete oauthaccesstokens.oauth.openshift.io "$name" >/dev/null 2>&1 \
+        || echo "warning: could not revoke token on the server" >&2 ;;
+  esac
+  kubectl config unset "users.$kuser.token" >/dev/null || return
+  echo "Logged \"$kuser\" out on \"$(_k_current_server)\""
+}
+
+_klogin_usage() {
+  cat >&2 <<'EOF'
+usage:
+  klogin [SERVER] [--token=TOKEN] [-u USER [-p PASS]] [-n NAMESPACE] [--name CONTEXT]
+         [--insecure-skip-tls-verify] [--certificate-authority=FILE]
+      Token login (any cluster) or OpenShift username/password login.
+      Without SERVER the server of the current context is used.
+  klogin --talos [NODE] [-e ENDPOINT] [--talos-context CTX] [--name CONTEXT] [--force]
+      Fetch the admin kubeconfig with talosctl and merge it.
+  klogin --kubeconfig FILE [--name CONTEXT] [-n NAMESPACE]
+      Merge the current context of FILE into your kubeconfig (kubeadm, k3s, rancher, ...).
+EOF
+}
+
+# Merges the current context of a kubeconfig file, optionally renaming
+# its context, cluster and user to $name.
+_klogin_kubeconfig() {
+  local file=$1 name=$2 ns=$3 target cfg old_ctx old_cluster old_user esc_new pat
+  [ -r "$file" ] || { _k_err "cannot read $file"; return 1; }
+  target=$(_k_kubeconfig_target)
+  cfg=$(kubectl --kubeconfig="$file" config view --minify --flatten) || return
+  old_ctx=$(kubectl --kubeconfig="$file" config view --minify -o jsonpath='{.contexts[0].name}')
+  old_cluster=$(kubectl --kubeconfig="$file" config view --minify -o jsonpath='{.contexts[0].context.cluster}')
+  old_user=$(kubectl --kubeconfig="$file" config view --minify -o jsonpath='{.contexts[0].context.user}')
+
+  if [ -n "$name" ]; then
+    pat=$(printf '%s\n%s\n%s\n' "$old_ctx" "$old_cluster" "$old_user" \
+      | sed 's/[][\.*^$/+?(){}|]/\\&/g' | paste -sd '|' -)
+    esc_new=$(printf '%s' "$name" | sed 's/[\/&]/\\&/g')
+    cfg=$(printf '%s\n' "$cfg" \
+      | sed -E "s/^([[:space:]]*-?[[:space:]]*(name|cluster|user|current-context):[[:space:]]+)($pat)\$/\1$esc_new/")
+  fi
+  printf '%s\n' "$cfg" > "$_k_tmpdir/new"
+
+  mkdir -p "${target%/*}"
+  [ -f "$target" ] && cp "$target" "$target.bak"
+  # New file first so its entries win over stale ones with the same name.
+  KUBECONFIG="$_k_tmpdir/new:$target" kubectl config view --flatten > "$_k_tmpdir/merged" || return
+  mv "$_k_tmpdir/merged" "$target" && chmod 600 "$target"
+
+  [ -n "$ns" ] && kubectl config set-context --current --namespace="$ns" >/dev/null
+  echo "Merged context \"$(kubectl config current-context)\" into $target"
+}
+
+_klogin_talos() {
+  local node=$1 endpoint=$2 tctx=$3 name=$4 force=$5 ns=$6
+  local -a targs
+  command -v talosctl >/dev/null 2>&1 || { _k_err "talosctl is not installed"; return 1; }
+  targs=(kubeconfig "$(_k_kubeconfig_target)" --merge=true)
+  [ -n "$node" ] && targs+=(--nodes "$node")
+  [ -n "$endpoint" ] && targs+=(--endpoints "$endpoint")
+  [ -n "$tctx" ] && targs+=(--context "$tctx")
+  [ -n "$name" ] && targs+=(--force-context-name "$name")
+  [ -n "$force" ] && targs+=(--force)
+  talosctl "${targs[@]}" || return
+  [ -n "$ns" ] && kubectl config set-context --current --namespace="$ns" >/dev/null
+  echo "Logged in using context \"$(kubectl config current-context)\" as \"$(kwhoami)\"."
+}
+
+_klogin() {
+  local server="" token="" user="" pass="" ns="" name="" ca="" insecure=""
+  local mode="" kcfile="" node="" endpoint="" tctx="" force=""
+  local cluster kuser ctx cadata auth_url location rc username count reply
+  local -a ctls ktls
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      -h|--help) _klogin_usage; return 0 ;;
+      --token=*) token=${1#*=}; shift ;;
+      --token) token=$2; shift 2 || return 1 ;;
+      -u|--username) user=$2; shift 2 || return 1 ;;
+      --username=*) user=${1#*=}; shift ;;
+      -p|--password) pass=$2; shift 2 || return 1 ;;
+      --password=*) pass=${1#*=}; shift ;;
+      -n|--namespace) ns=$2; shift 2 || return 1 ;;
+      --namespace=*) ns=${1#*=}; shift ;;
+      --name) name=$2; shift 2 || return 1 ;;
+      --name=*) name=${1#*=}; shift ;;
+      --insecure-skip-tls-verify|--insecure-skip-tls-verify=true) insecure=1; shift ;;
+      --certificate-authority) ca=$2; shift 2 || return 1 ;;
+      --certificate-authority=*) ca=${1#*=}; shift ;;
+      -s|--server) server=$2; shift 2 || return 1 ;;
+      --server=*) server=${1#*=}; shift ;;
+      --kubeconfig) mode=kubeconfig; kcfile=$2; shift 2 || return 1 ;;
+      --kubeconfig=*) mode=kubeconfig; kcfile=${1#*=}; shift ;;
+      --talos) mode=talos; shift ;;
+      -e|--endpoints) endpoint=$2; shift 2 || return 1 ;;
+      --endpoints=*) endpoint=${1#*=}; shift ;;
+      --talos-context) tctx=$2; shift 2 || return 1 ;;
+      --talos-context=*) tctx=${1#*=}; shift ;;
+      -f|--force) force=1; shift ;;
+      -*) _k_err "unknown flag $1"; _klogin_usage; return 1 ;;
+      *)
+        if [ "$mode" = talos ]; then node=$1; else server=$1; fi
+        shift ;;
+    esac
+  done
+
+  case $mode in
+    kubeconfig) _klogin_kubeconfig "$kcfile" "$name" "$ns"; return ;;
+    talos) _klogin_talos "$node" "$endpoint" "$tctx" "$name" "$force" "$ns"; return ;;
+  esac
+
+  # Resolve server and the kubeconfig cluster entry name
+  if [ -z "$server" ]; then
+    cluster=$(kubectl config view --minify -o jsonpath='{.contexts[0].context.cluster}' 2>/dev/null)
+    [ -n "$cluster" ] || { _k_err "no server given and no current context"; _klogin_usage; return 1; }
+    server=$(_k_cluster_field "$cluster" server)
+  else
+    case $server in http://*|https://*) ;; *) server="https://$server" ;; esac
+    server=${server%/}
+    cluster=$(_k_cluster_name "$server")
+  fi
+
+  # Reuse TLS settings of an existing cluster entry when none are given
+  if [ -z "$insecure" ] && [ -z "$ca" ]; then
+    [ "$(_k_cluster_field "$cluster" insecure-skip-tls-verify)" = true ] && insecure=1
+    ca=$(_k_cluster_field "$cluster" certificate-authority)
+    cadata=$(_k_cluster_field "$cluster" certificate-authority-data)
+    if [ -n "$cadata" ]; then
+      ca="$_k_tmpdir/ca.crt"
+      printf '%s' "$cadata" | base64 -d > "$ca" || return
+    fi
+  fi
+  if [ -z "$insecure" ] && [ -z "$ca" ]; then
+    curl -sS -o /dev/null --max-time 10 "$server/version" 2>/dev/null
+    rc=$?
+    if [ $rc -eq 60 ]; then
+      printf 'The server uses a certificate signed by an unknown authority.\nUse insecure connections? (y/n): ' >&2
+      read -r reply
+      case $reply in y|Y|yes) insecure=1 ;; *) return 1 ;; esac
+    elif [ $rc -ne 0 ]; then
+      _k_err "cannot reach $server (curl exit code $rc)"; return 1
+    fi
+  fi
+  if [ -n "$insecure" ]; then
+    ctls=(-k); ktls=(--insecure-skip-tls-verify=true)
+  elif [ -n "$ca" ]; then
+    ctls=(--cacert "$ca"); ktls=(--certificate-authority="$ca")
+  fi
+
+  # OpenShift OAuth login when no token is given
+  if [ -z "$token" ]; then
+    auth_url=$(curl -sS "${ctls[@]}" --max-time 10 "$server/.well-known/oauth-authorization-server" 2>/dev/null \
+      | grep -o '"authorization_endpoint"[^,}]*' | sed 's/.*:[[:space:]]*"\(.*\)"/\1/')
+    if [ -z "$auth_url" ]; then
+      [ -z "$user" ] || { _k_err "server does not support username/password login, use --token, --kubeconfig or --talos"; return 1; }
+      printf 'Token: ' >&2; read -rs token; echo >&2
+    else
+      [ -n "$user" ] || { printf 'Username: ' >&2; read -r user; }
+      [ -n "$pass" ] || { printf 'Password: ' >&2; read -rs pass; echo >&2; }
+      # Credentials go via a curl config on stdin so they don't show up in ps
+      location=$(printf 'user = "%s:%s"\n' \
+          "$(printf '%s' "$user" | sed 's/[\\"]/\\&/g')" \
+          "$(printf '%s' "$pass" | sed 's/[\\"]/\\&/g')" \
+        | curl -sS "${ctls[@]}" -K - -o /dev/null -w '%{redirect_url}' -H 'X-CSRF-Token: 1' \
+            "$auth_url?response_type=token&client_id=openshift-challenging-client")
+      case $location in
+        *access_token=*)
+          token=${location#*access_token=}
+          token=${token%%&*} ;;
+        *error=*)
+          _k_err "login failed: ${location#*error=}"; return 1 ;;
+        *)
+          _k_err "login failed (401 Unauthorized), verify your credentials"; return 1 ;;
+      esac
+    fi
+  fi
+  [ -n "$token" ] || { _k_err "no token"; return 1; }
+
+  # Validate the token and find out who we are
+  username=$(kubectl --kubeconfig=/dev/null --server="$server" --token="$token" "${ktls[@]}" \
+    auth whoami -o jsonpath='{.status.userInfo.username}' 2>/dev/null) \
+  || username=$(kubectl --kubeconfig=/dev/null --server="$server" --token="$token" "${ktls[@]}" \
+    get users.user.openshift.io '~' -o jsonpath='{.metadata.name}' 2>/dev/null)
+  if [ -z "$username" ]; then
+    kubectl --kubeconfig=/dev/null --server="$server" --token="$token" "${ktls[@]}" get --raw /api >/dev/null || {
+      _k_err "login failed, the token was rejected"; return 1; }
+    username=token
+  fi
+
+  kuser="$username/$cluster"
+  ctx=${name:-"$username@$cluster"}
+  if [ -n "$insecure" ]; then
+    kubectl config set-cluster "$cluster" --server="$server" --insecure-skip-tls-verify=true >/dev/null || return
+    kubectl config unset "clusters.$cluster.certificate-authority-data" >/dev/null 2>&1
+    kubectl config unset "clusters.$cluster.certificate-authority" >/dev/null 2>&1
+  elif [ -n "$ca" ]; then
+    kubectl config set-cluster "$cluster" --server="$server" --insecure-skip-tls-verify=false \
+      --certificate-authority="$ca" --embed-certs=true >/dev/null || return
+  else
+    kubectl config set-cluster "$cluster" --server="$server" --insecure-skip-tls-verify=false >/dev/null || return
+  fi
+  kubectl config set-credentials "$kuser" --token="$token" >/dev/null || return
+  kubectl config set-context "$ctx" --cluster="$cluster" --user="$kuser" >/dev/null || return
+  [ -n "$ns" ] && kubectl config set-context "$ctx" --namespace="$ns" >/dev/null
+  kubectl config use-context "$ctx" >/dev/null || return
+
+  echo "Logged into \"$server\" as \"$username\" using context \"$ctx\"."
+  if [ -z "$ns" ]; then
+    count=$(_k_list_ns 2>/dev/null | grep -c .)
+    echo "You have access to $count projects, using project \"$(_k_current_ns)\"."
+  fi
+}
+
+klogin() {
+  local _k_tmpdir rc
+  _k_tmpdir=$(mktemp -d) || return
+  _klogin "$@"
+  rc=$?
+  rm -rf "$_k_tmpdir"
+  return $rc
+}
+
+# Completion
+if [ -n "$ZSH_VERSION" ]; then
+  _kctx_complete() { compadd -- $(kubectl config get-contexts -o name 2>/dev/null); }
+  _kproject_complete() { compadd -- $(_k_list_ns 2>/dev/null); }
+  compdef _kctx_complete kctx
+  compdef _kproject_complete kproject
+elif [ -n "$BASH_VERSION" ]; then
+  _kctx_complete() { COMPREPLY=($(compgen -W "$(kubectl config get-contexts -o name 2>/dev/null)" -- "${COMP_WORDS[COMP_CWORD]}")); }
+  _kproject_complete() { COMPREPLY=($(compgen -W "$(_k_list_ns 2>/dev/null)" -- "${COMP_WORDS[COMP_CWORD]}")); }
+  complete -F _kctx_complete kctx
+  complete -F _kproject_complete kproject
+fi
