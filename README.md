@@ -32,7 +32,7 @@ On the first apply chezmoi:
 
 With `work = true`:
 
-- packages under `packages.personal` (Claude Code, Gemini CLI) are not installed
+- packages under `packages.personal` (Claude Code, Antigravity CLI) are not installed
 - the Neovim AI extras (Copilot, Claude Code) are left out of `lua/config/extras.lua`
 - the sops age key (`~/.config/sops`, `~/.sops.yaml`) is not deployed
 - AI tool config dirs (`~/.claude`, `~/.gemini`, `~/.config/github-copilot`) are ignored by chezmoi

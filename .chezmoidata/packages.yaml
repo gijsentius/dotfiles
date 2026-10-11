@@ -87,10 +87,8 @@ packages:
     darwin:
       casks:
         - "claude-code"
-      brews:
-        - "gemini-cli"
+        - "antigravity-cli"
     linux:
       casks:
         - "claude-code"
-      brews:
-        - "gemini-cli"
+        - "antigravity-cli"
