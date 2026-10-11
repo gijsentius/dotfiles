@@ -54,10 +54,8 @@
 	cp = cherry-pick
 	gr = grep -Ii
 
-	# Tweak defaults    
-	diff = diff --word-diff
-	branch = branch -ra
-	grep = grep -Ii
+	# Tweak defaults (git ignores aliases named after built-in commands,
+	# so these get their own names)
 	bra = branch -ra
 	ai = add --interactive
 
@@ -103,7 +101,7 @@
 	# stash 
 	sl = stash list
 	sa = stash apply
-	ss = stash save
+	ss = stash push
 
 	# assume aliases 
 	assume = update-index --assume-unchanged

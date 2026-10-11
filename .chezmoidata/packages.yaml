@@ -12,7 +12,6 @@ packages:
       - "gh"
       - "lazygit"
       - "starship"
-      - "zsh-syntax-highlighting"
       # - "k9s" replaces with sofka
       - "sofka"
       - "trivy"
@@ -25,6 +24,7 @@ packages:
       - "go"
       - "mergiraf"
       - "difftastic"
+      - "yazi"
       - "ack"
       - "exiv2"
       - "make"
@@ -67,6 +67,11 @@ packages:
       - "tailscale"
       - "tree-sitter-cli"
       - "kubernetes-cli"
+      - "gh"
+      - "lazygit"
+      - "yazi"
+      - "mergiraf"   # merge driver in ~/.gitattributes
+      - "difftastic" # git dlog/ddiff aliases
     apt:
       - "ripgrep"
       - "wget"
