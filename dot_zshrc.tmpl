@@ -78,9 +78,11 @@ export PATH=~/.local/bin/:$PATH
 
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
-# Source all zsh stuff (files only; completions are loaded by completions.sh)
+# Source all zsh stuff managed by chezmoi (aliases, completions, ...)
 for f in ~/.zsh/*(.N); do source $f; done
 
-if [ -f ~/.zsh_overrides ]; then
-source ~/.zsh_overrides
-fi
+# Machine-specific config that isn't in chezmoi (e.g. work settings, secrets).
+# Drop any *.zsh file in ~/.zsh/local/; loaded last so it can override the above.
+for f in ~/.zsh/local/*.zsh(.N); do source $f; done
+[ -f ~/.zsh_overrides ] && source ~/.zsh_overrides
+unset f

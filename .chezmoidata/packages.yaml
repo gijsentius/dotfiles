@@ -12,7 +12,6 @@ packages:
       - "gh"
       - "lazygit"
       - "starship"
-      # - "k9s" replaces with sofka
       - "sofka"
       - "trivy"
       - "elixir"
@@ -57,7 +56,6 @@ packages:
       - "talhelper"
       - "sops"
       - "age"
-      # - "k9s" replaces with sofka
       - "sofka"
       - "ruff"
       - "go"

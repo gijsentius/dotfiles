@@ -7,3 +7,4 @@
 .config/yazi.toml
 # Replaced by cached completions in ~/.cache/zsh/completions
 .zsh/completions
+.zsh/zsh_aliases
