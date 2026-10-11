@@ -7,7 +7,7 @@
 	email = {{ .email }}
 [core]
 	hooksPath = ~/.config/git/centralized/hooks
-	editor = /usr/bin/vim
+	editor = nvim
 	excludesfile = ~/.gitignore_global
 	pager=less -x4
 	attributesfile = ~/.gitattributes
@@ -139,11 +139,6 @@
 
 	#apply patch from other local repo
 	lap = "!f() { git --git-dir=$1 format-patch -k -1 --stdout $2 | git am -3 -k; }; f"
-
-	#open markdown files edited in last commit
-	last = "!gvim $(git show HEAD --format="" --name-only | grep -e .*md$ | xargs)"
-	#open just created markdown in working directory
-	newmd = "!gvim $(git status -s | awk {'print $2'})"
 
 	# initial empty commit
 	empty = "!git commit -am\"[empty] Initial commit\" --allow-empty"

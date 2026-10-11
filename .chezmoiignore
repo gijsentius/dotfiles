@@ -13,3 +13,8 @@ install.sh
 .config/github-copilot
 .config/github-copilot/**
 {{- end }}
+{{- if .work }}
+.config/sops
+.config/sops/**
+.sops.yaml
+{{- end }}

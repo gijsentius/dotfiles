@@ -1,146 +1,96 @@
-# Dotfiles Configuration
+# Dotfiles
 
-A cross-platform dotfiles configuration managed with [chezmoi](https://www.chezmoi.io/), providing a consistent development environment across Linux and macOS systems.
-
-## Features
-
-### Development Environment
-- **Shell**: Zsh with [zinit](https://github.com/zdharma-continuum/zinit) plugin manager
-- **Prompt**: [Starship](https://starship.rs/) cross-shell prompt
-- **Terminal**: Alacritty with FiraCode Nerd Font
-- **Editor**: Neovim with kickstart configuration
-- **Version Control**: Git with extensive aliases and difftastic integration
-- **Multiplexer**: Tmux with gpakosz configuration
-
-### Development Tools
-- **Kubernetes**: kubectl, k9s, krew plugins, flux, helm
-- **Languages**: Go, Node.js (via nvm), Elixir, Python (ruff linter)
-- **Utilities**: ripgrep, fd, fzf, lima (macOS), trivy security scanner
-- **Git Tools**: git-extras, mergiraf merge tool, difftastic diff viewer
-
-### Shell Enhancements
-- Syntax highlighting and autosuggestions
-- Fuzzy finding with fzf-tab integration
-- Oh My Zsh plugins (git, helm, argocd, chezmoi, etc.)
-- Custom aliases for common operations
-- Kubernetes and Lima completions
+My dotfiles for macOS and Linux (Ubuntu / WSL), managed with [chezmoi](https://www.chezmoi.io/). One repo serves both personal and work machines; work machines get the same setup minus AI tooling and personal secrets.
 
 ## Installation
 
-1. Install chezmoi:
-   ```bash
-   # Linux
-   curl -sfL https://git.io/chezmoi | sh
-
-   # macOS
-   brew install chezmoi
-   ```
-
-2. Initialize with this repository:
-   ```bash
-   chezmoi init --apply https://github.com/yourusername/dotfiles.git
-   ```
-
-## Platform Support
-
-### Linux (Ubuntu/Debian)
-- Package management via `apt`
-- Manual installations for modern tools (Go, fzf, flux, ruff)
-- Homebrew installation as fallback package manager
-
-### macOS
-- Primary package management via Homebrew
-- Comprehensive tool installation including GUI applications
-- Lima for lightweight Linux VMs
-- Google Cloud SDK integration
-
-## File Structure
-
-```
-├── .chezmoiignore           # Platform-specific ignore rules
-├── dot_alacritty.toml       # Alacritty terminal configuration
-├── dot_gitconfig            # Git configuration with aliases
-├── dot_zshrc.tmpl           # Zsh configuration (templated)
-├── dot_zsh_aliases          # Shell aliases
-├── dot_config/              # Application configs
-│   ├── kube_complete.sh     # Kubernetes completion
-│   └── lima_completion.zsh  # Lima completion (macOS)
-├── run_onchange_before_install-packages.sh.tmpl    # Main package installer
-├── run_once_before_install-packages-unmanaged.sh.tmpl  # One-time setup
-├── run_onchange_before_install-go.sh.tmpl          # Go installation
-└── run_once_zz-kickstart-nvim.sh                   # Neovim setup
-```
-
-## Customization
-
-### Platform-Specific Configuration
-The configuration uses chezmoi templating to handle OS differences:
+On a new machine:
 
 ```bash
-{{ if eq .chezmoi.os "linux" -}}
-# Linux-specific configuration
-{{ else if eq .chezmoi.os "darwin" -}}
-# macOS-specific configuration
-{{ end -}}
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply gijsentius/dotfiles
 ```
 
-### Work vs. Personal Machines
-`chezmoi init` asks once whether this is a work machine and stores the answer as `work` in `~/.config/chezmoi/chezmoi.toml`. When `work = true`:
-- packages under `packages.personal` in `.chezmoidata/packages.yaml` (AI tooling such as Claude Code) are not installed
+Or from a local clone, `./install.sh` installs chezmoi if needed and runs `chezmoi init --apply` against the clone.
+
+`chezmoi init` asks two questions once and stores the answers in `~/.config/chezmoi/chezmoi.toml`:
+
+| Prompt | Data key | Used for |
+| --- | --- | --- |
+| Is this a work machine (no AI tooling) | `work` | See [Work machines](#work-machines) |
+| Git email address | `email` | `user.email` in `~/.gitconfig` |
+
+To change an answer later, run `chezmoi edit-config` and then `chezmoi apply`.
+
+On the first apply chezmoi:
+
+1. installs Homebrew if it isn't there (`run_once_before_install-brew.sh`)
+2. installs packages from `.chezmoidata/packages.yaml` (`run_onchange_install-packages.sh.tmpl`, re-runs whenever the package list changes)
+3. clones [oh-my-tmux](https://github.com/gpakosz/.tmux) into `~/.tmux` (`.chezmoiexternal.toml`, pulled weekly)
+4. writes the dotfiles
+
+## Work machines
+
+With `work = true`:
+
+- packages under `packages.personal` (Claude Code, Gemini CLI) are not installed
 - the Neovim AI extras (Copilot, Claude Code) are left out of `lua/config/extras.lua`
-- AI tool config dirs (`~/.claude`, `~/.gemini`, `~/.config/github-copilot`) are ignored
+- the sops age key (`~/.config/sops`, `~/.sops.yaml`) is not deployed
+- AI tool config dirs (`~/.claude`, `~/.gemini`, `~/.config/github-copilot`) are ignored by chezmoi
 
-To change it later, edit `work` with `chezmoi edit-config`, then `chezmoi apply`.
+To keep something off work machines, add the package under `packages.personal`, wrap the config in `{{ if not .work }}`, or add the path to the `{{ if .work }}` block in `.chezmoiignore`.
 
-### Local Overrides
-Create `~/.zsh_overrides` for machine-specific customizations that won't be tracked by chezmoi.
+## What's included
 
-## Key Aliases
+| Tool | Source | Notes |
+| --- | --- | --- |
+| Zsh | `dot_zshrc.tmpl`, `dot_zsh/` | [zinit](https://github.com/zdharma-continuum/zinit) plugins, fzf-tab, autosuggestions, syntax highlighting, OMZ snippets. Auto-attaches to a `workspace` tmux session. |
+| Prompt | `dot_config/empty_starship.toml` | [Starship](https://starship.rs/) with default settings |
+| Neovim | `dot_config/nvim/` | [LazyVim](https://www.lazyvim.org/) with extras for Go, Python, Helm, Docker, YAML and more; extra Go/Python LSP, test and debug settings in `lua/plugins/` |
+| Tmux | `dot_tmux.conf.local` | oh-my-tmux, customised through `~/.tmux.conf.local` |
+| Git | `dot_gitconfig.tmpl`, `dot_gitattributes` | Aliases, [difftastic](https://difftastic.wilfred.me.uk/) (`git dlog`, `git ddiff`, ...) and [mergiraf](https://mergiraf.org/) as merge driver |
+| Alacritty | `dot_alacritty.toml` | macOS only |
+| Yazi | `dot_config/yazi/yazi.toml` | Use `y` to open yazi and `cd` to where you quit |
+| sops / age | `dot_sops.yaml`, `dot_config/sops/` | The age key is stored encrypted; decrypt it with `age -d` to `~/.config/sops/age/keys.txt` |
 
-### Git Shortcuts
-- `gst` / `gs` - git status
-- `gcm` - git commit -m
-- `gpu` - git push to current branch
-- `gco` - git checkout
-- `gd` - git diff with word-diff
+Packages are listed per OS in `.chezmoidata/packages.yaml`: Homebrew formulae and casks on macOS, and apt plus Homebrew on Linux.
 
-### Kubernetes
-- `k` - kubectl shorthand
-- All kubectl plugins via krew
+## Repository layout
 
-### System
-- `ll` - detailed file listing
-- `la` - all files with details
-- `vim` - launches neovim
-- `projects` - navigate to ~/Projects
-
-## Dependencies
-
-### Required
-- Git
-- Zsh
-- curl/wget
-
-### Installed Automatically
-All development tools and utilities are installed automatically via the chezmoi scripts based on your platform.
-
-## Updating
-
-```bash
-# Update dotfiles
-chezmoi update
-
-# Re-run package installations (if needed)
-chezmoi apply --force
+```
+.chezmoi.toml.tmpl                    # init prompts (work, email)
+.chezmoidata/packages.yaml            # packages per OS, plus personal-only
+.chezmoiexternal.toml                 # oh-my-tmux checkout
+.chezmoiignore                        # per-OS and work-machine exclusions
+.chezmoiremove                        # stale files to delete from $HOME
+run_once_before_install-brew.sh       # Homebrew bootstrap
+run_onchange_install-packages.sh.tmpl # package installation
+dot_zshrc.tmpl
+dot_zsh/
+├── zsh_aliases                       # shell and git aliases
+├── completions.sh.tmpl               # loads completions below + flux/fzf
+└── completions/                      # kubectl, talosctl, sops, lima
+dot_config/
+├── nvim/                             # LazyVim config
+├── yazi/yazi.toml
+├── sops/age/keys.txt.age
+└── empty_starship.toml
+dot_gitconfig.tmpl
+dot_gitattributes
+dot_tmux.conf.local
+symlink_dot_tmux.conf                 # ~/.tmux.conf -> ~/.tmux/.tmux.conf
+dot_alacritty.toml
+dot_sops.yaml
+install.sh                            # bootstrap from a local clone
 ```
 
-## Contributing
+## Day-to-day
 
-1. Fork the repository
-2. Make your changes
-3. Test on both Linux and macOS if possible
-4. Submit a pull request
+```bash
+chezmoi edit ~/.zshrc     # edit the source of a managed file
+chezmoi diff              # preview changes
+chezmoi apply             # apply them
+chezmoi update            # git pull + apply
+chezmoi cd                # open a shell in this repo
+```
 
-## License
-
-MIT License - feel free to use and modify as needed.
+Machine-specific shell settings that shouldn't be committed go in `~/.zsh_overrides`, which `~/.zshrc` sources if it exists.

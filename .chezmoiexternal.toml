@@ -1,0 +1,6 @@
+# oh-my-tmux (https://github.com/gpakosz/.tmux). ~/.tmux.conf symlinks to
+# ~/.tmux/.tmux.conf; personal settings live in ~/.tmux.conf.local.
+[".tmux"]
+    type = "git-repo"
+    url = "https://github.com/gpakosz/.tmux.git"
+    refreshPeriod = "168h"
