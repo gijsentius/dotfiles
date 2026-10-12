@@ -28,6 +28,7 @@ alias df='df -x"squashfs"'
 # Misc
 alias pandock='docker run --rm --platform linux/amd64 -v "$(pwd):/data" -u $(id -u):$(id -g) pandoc/extra --from markdown --template eisvogel --listings'
 alias createpassword='openssl rand -base64 30'
+alias createmac='printf '%02x:%s\n' $(( 0x$(openssl rand -hex 1) & 0xFE | 0x02 )) "$(openssl rand -hex 5 | sed 's/../&:/g; s/:$//')"'
 
 # Git: every git alias from ~/.gitconfig as g<alias> (e.g. gst, gcm, gd)
 for al in $(git --list-cmds=alias); do
